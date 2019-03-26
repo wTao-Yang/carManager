@@ -20,7 +20,7 @@
     </div> -->
     <div class="main">
       <div class="fabu">
-        <el-button type="primary">发布</el-button>
+        <el-button type="primary" @click="goNewCar">发布</el-button>
       </div>
       
       <el-table class="table" :data="tableData" border style="width: 100%">
@@ -58,10 +58,13 @@ export default {
   },
   methods: {
     handleClick(row) {
-      console.log(row);
+      this.$router.push({name: 'newCar',query:{id: row.id}})
     },
     handleSelect(key, keyPath) {
       console.log(key, keyPath);
+    },
+    goNewCar(){
+      this.$router.push({name: 'newCar'})
     }
   },
 

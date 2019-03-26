@@ -7,10 +7,20 @@ Vue.use(Router)
 export default new Router({
   routes: [
     {
+      path: '/',
+      name: 'login',
+      component: () => import(/* webpackChunkName: "about" */ './views/login.vue')
+    },
+    {
       path: '/index',
       name: 'index',
       component: () => import(/* webpackChunkName: "about" */ './views/index.vue'),
       children:[
+        {
+          path: '/newCar',
+          name: 'newCar',
+          component: () => import(/* webpackChunkName: "about" */ './views/newCar.vue')
+        },
         {
           path: '/about',
           name: 'about',

@@ -39,6 +39,7 @@
         <el-menu-item index="setting">设置</el-menu-item>
         <el-menu-item index="suggest">意见反馈</el-menu-item>
         <el-menu-item index="admin">权限管理</el-menu-item>
+        <el-menu-item index="login">退出</el-menu-item>
       </el-menu>
     </div>
     <router-view></router-view>
@@ -152,6 +153,7 @@ export default {
   /deep/ .el-menu{
     text-align: center;
     width: 80%;
+    min-width: 800px;
     margin: 0 auto;
   }
   .flex {
@@ -179,6 +181,7 @@ export default {
 }
 .main {
   width: 80%;
+  min-width: 800px;
   margin:0 auto;
   height: 1000px;
   // background-color: #f6f6f6;

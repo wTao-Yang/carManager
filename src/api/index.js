@@ -21,6 +21,8 @@ function getData(url,method='post'){
 	}
 };
 
-export{
+const uploads=getData('/upload')
 
+export{
+	uploads
 }
