@@ -2,7 +2,8 @@
   <div class="home">
     <!-- <img alt="Vue logo" src="../assets/logo.png"> -->
     <!-- <HelloWorld msg="Welcome to Your Vue.js App"/> -->
-    <div class="header">
+    <div v-if="isLogin">
+    <div class="header" >
       <!-- <div>车来车往</div> -->
       <!-- <div class="flex">
         <div>车辆列表</div>
@@ -38,11 +39,15 @@
         <el-menu-item index="appoint">看车预约</el-menu-item>
         <el-menu-item index="setting">设置</el-menu-item>
         <el-menu-item index="suggest">意见反馈</el-menu-item>
-        <el-menu-item index="admin">权限管理</el-menu-item>
+        <el-menu-item v-if="isSuper" index="admin">权限管理</el-menu-item>
         <el-menu-item index="login">退出</el-menu-item>
       </el-menu>
     </div>
     <router-view></router-view>
+    </div>
+    <div v-else>
+      <el-button type="primary" @click="goLogin">请先登录...</el-button>
+    </div>
   </div>
 </template>
 
@@ -56,6 +61,9 @@ export default {
     HelloWorld
   },
   methods: {
+    goLogin(){
+      this.$router.push({name:'login'})
+    },
     handleClick(row) {
       console.log(row);
     },
@@ -63,7 +71,25 @@ export default {
         this.$router.push({name: key})
     }
   },
-
+  created(){
+    let routerName = this.$route.name
+    if(routerName == 'newCar'){
+      this.activeIndex2 = 'home'
+    }
+    else if(routerName == 'brand' || routerName == 'hotBrand' || routerName == 'wheel'){
+      this.activeIndex2 = 'setting'
+    }else{
+      this.activeIndex2 = routerName
+    }
+  },
+  computed:{
+    isLogin(){
+      return sessionStorage.getItem("status")
+    },
+        isSuper(){
+      return sessionStorage.getItem('status')==0
+    }
+  },
   data() {
     return {
                 form: {
@@ -76,7 +102,7 @@ export default {
           resource: '',
           desc: ''
         },
-      activeIndex2: "1",
+      activeIndex2: "",
      tableData: [
         {
           id: "12987122",

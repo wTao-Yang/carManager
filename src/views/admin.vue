@@ -18,7 +18,7 @@
           </template>
         </el-table-column>
       </el-table>
-      <el-pagination class="page" background layout="prev, pager, next" :total="4"></el-pagination>
+       <el-pagination @current-change="change" class="page" :page-size="5" background layout="prev, pager, next" :total="dataList.length"></el-pagination>
     </div>
     <div class="message" v-if="showMes"></div>
     <div class="mes" v-if="showMes">
@@ -54,14 +54,45 @@ export default {
   components: {
     HelloWorld
   },
+  created(){
+    this.getAdmin()
+  },
   methods: {
-    submit(){
+    getAdmin(){
+      let self = this
+      this.$api.getAdmin({},data=>{
+                this.dataList = data
+        
+        let self= this
+        this.dataList.forEach(item=>{
+          item.status = self.statusList[item.status]
+        })
 
+        this.tableData = this.dataList.slice(0,5)
+      })
+    },
+    submit(){
+      if(this.adminName=='' || this.passWord==''){
+        this.$message({ message: "帐号密码不能为空", type: "error",duration:'1500' });
+        return
+      }
+      if(this.passWord!=this.vPassWord){
+        this.$message({ message: "第二次密码输入错误", type: "error",duration:'1500' });
+        return
+      }
+      this.$api.setAdmin({adminId:this.adminId,adminName:this.adminName,passWord:this.passWord},data=>{
+                if (data.isSuccess) {
+          this.$message({ message: "新建成功", type: "success",duration:'1500' });
+          this.getAdmin()
+          this.closeMes()
+        }
+      })
     },
     handleClick(row) {
       this.title='编辑管理';
-      this.adminName=row.id;
+      this.adminName=row.adminName;
       this.passWord=row.passWord;
+      this.adminId = row.adminId;
       this.showMes=true;
       console.log(row);
     },
@@ -69,11 +100,23 @@ export default {
       console.log(key, keyPath);
     },
     deleteAdmin(row){
-      
+      this.$api.deleteAdmin({adminId:row.adminId},data=>{
+        if (data.code==0) {
+          this.$message({ message: "删除成功", type: "success",duration:'1500' });
+          this.getAdmin()
+        }
+      })
+    },
+            change(page){
+      this.tableData = this.dataList.slice((page-1)*5,page*5)
     },
     openMes(){
       this.title='新建管理';
       this.showMes=true;
+      this.adminId=''
+      this.adminName=''
+      this.passWord=''
+      this.vPassWord=''
     },
     closeMes(){
       this.showMes=false;
@@ -85,6 +128,9 @@ export default {
 
   data() {
     return {
+      dataList:[],
+      statusList:['超级管理员','普通管理员'],
+      adminId:'',
       passWord:'',
       vPassWord:'',
       adminName:'',
@@ -92,66 +138,7 @@ export default {
       showMes:false,
       activeIndex2: "1",
       tableData: [
-        {
-          id: "123456",
-          name: "日产-轩逸 1025款 经典 2.6XE CVT舒适版",
-          price: "8",
-          brand: "日产",
-          access: "上海市普陀区真北路",
-          introduction: "王小虎夫妻店",
-          date: "2014",
-          phone: "13531522222",
-          mileage: "4.32",
-          status: "普通管理员",
-          nickName: "王先生",
-          message:
-            "这是测试建议反馈的数据！这是测试建议反馈的数据！这是测试建议反馈的数据！",
-          clickNum: 3,
-          passWord: 123456
-        },
-        {
-          id: "123458",
-          name: "奔腾X80 2015款 2.0L 自动舒适周年纪念型",
-          price: "6",
-          brand: "奔腾",
-          access: "上海市普陀区真北路",
-          introduction: "王小虎夫妻店",
-          phone: "13531522222",
-          date: "2014",
-          mileage: "8.44",
-          nickName: "王先生",
-          status: "普通管理员",
-          passWord: 123458,
-          clickNum: 12
-        }
-        // {
-        //   id: "12987188",
-        //   name: "比亚迪 唐新能源 2015款 2.0T 四驱旗舰型",
-        //   price: "11",
-        //   brand: "比亚迪",
-        //   access: "上海市普陀区真北路",
-        //   introduction: "王小虎夫妻店",
-        //   phone:'13531522222',
-        //   date: '2015',
-        //   nickName:'王先生',
-        //   mileage: "6.07",
-        //   status:'已售出',
-        //   clickNum:2
-        // },
-        // {
-        //   id: "12987146",
-        //   name: "日产 轩逸 2012款 1.8XL CVT豪华版",
-        //   price: "7",
-        //   brand: "日产",
-        //   date: '2013',
-        //   phone:'13531522222',
-        //   access: "上海市普陀区真北路",
-        //   introduction: "王小虎夫妻店",
-        //   nickName:'王先生',
-        //   mileage: "14.98",
-        //   status:'已下架',
-        //   clickNum:8
-        // },
+  
       ]
     };
   }

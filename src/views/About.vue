@@ -5,8 +5,8 @@
         <el-table-column type="expand">
           <template slot-scope="props">
             <el-form label-position="left" inline class="demo-table-expand">
-              <el-form-item label="申请者 ID">
-                <span>{{ props.row.id }}</span>
+              <el-form-item label="申请 ID">
+                <span>{{ props.row.applyId }}</span>
               </el-form-item>
               <el-form-item label="车辆名称">
                 <span>{{ props.row.name }}</span>
@@ -21,10 +21,13 @@
                 <span>{{ props.row.mileage }}</span>
               </el-form-item>
               <el-form-item label="上牌时间">
-                <span>{{ props.row.date }}</span>
+                <span>{{ props.row.year }}</span>
               </el-form-item>
               <el-form-item label="联系方式">
                 <span>{{ props.row.phone }}</span>
+              </el-form-item>
+              <el-form-item label="申请人姓名">
+                <span>{{ props.row.nickName }}</span>
               </el-form-item>
               <el-form-item label="审核状态">
                 <span>{{ props.row.status }}</span>
@@ -32,22 +35,26 @@
             </el-form>
           </template>
         </el-table-column>
-        <el-table-column label="申请者 ID" prop="id"></el-table-column>
+        <el-table-column label="申请 ID" prop="applyId"></el-table-column>
         <el-table-column label="车辆名称" prop="name"></el-table-column>
         <el-table-column label="价格" prop="price"></el-table-column>
         <el-table-column fixed="right" label="操作" width="200">
           <template slot-scope="scope">
             <div v-if="scope.row.status=='审核中'">
-            <el-button @click="handleClick(scope.row)" type="text" size="small">通过</el-button>
-            <el-button type="text" size="small">拒绝</el-button>
+            <el-button @click="handleClick(scope.row,2)" type="text" size="small">通过</el-button>
+            <el-button @click="handleClick(scope.row,3)" type="text" size="small">拒绝</el-button>
             </div>
-            <div v-else class="status">
+            <div v-else-if="scope.row.status=='已通过'" class="status_res">
               {{ scope.row.status }}
             </div>
+            <div v-else-if="scope.row.status=='已拒绝'|| scope.row.status=='已取消'" class="status_rej">
+              {{ scope.row.status }}
+            </div>
+            <el-button @click="deleteApply(scope.row)" type="text" size="small">删除</el-button>
           </template>
         </el-table-column>
       </el-table>
-      <el-pagination class="page" background layout="prev, pager, next" :total="4"></el-pagination>
+      <el-pagination @current-change="change" class="page" :page-size="5" background layout="prev, pager, next" :total="dataList.length"></el-pagination>
     </div>
   </div>
 </template>
@@ -55,15 +62,51 @@
 <script>
 // @ is an alias to /src
 import HelloWorld from "@/components/HelloWorld.vue";
-
+import { getApplyList,setApplyStatus } from "./../api/index.js";
 export default {
   name: "home",
   components: {
     HelloWorld
   },
+  created(){
+    this.getList()
+  },
   methods: {
-    handleClick(row) {
-      console.log(row);
+    deleteApply(row){
+      this.$api.deleteApply({applyId:row.applyId},data=>{
+        if(data.code==0){
+          this.$message({ message: "删除成功", type: "success",duration:'1500' });
+          this.getList()
+        }else{
+          this.$message({ message: "删除失败", type: "error" ,duration:'1500'});
+        }
+      })
+    },
+    getList(){
+      let self = this
+      getApplyList({},data=>{
+               this.dataList = data
+        
+        let self= this
+        this.dataList.forEach(item=>{
+          item.status = self.statusList[item.status]
+        })
+
+        this.tableData = this.dataList.slice(0,5)
+      })
+    },
+    handleClick(row,status) {
+      setApplyStatus({status:status,applyId:row.applyId},data=>{
+        if(data.code==0){
+          this.$message({ message: "操作成功", type: "success",duration:'1500' });
+          this.getList()
+        }else{
+          this.$message({ message: "操作失败", type: "error",duration:'1500' });
+        }
+      })
+    },
+            change(page){
+      this.tableData = this.dataList.slice((page-1)*5,page*5)
     },
     handleSelect(key, keyPath) {
       console.log(key, keyPath);
@@ -72,6 +115,8 @@ export default {
 
   data() {
     return {
+      dataList:[],
+                  statusList: ["审核中", "已取消", "已通过", "已拒绝"],
       activeIndex2: "1",
       tableData: [
         {
@@ -152,9 +197,13 @@ export default {
 .page {
   margin-top: 20px;
 }
-.status{
+.status_res{
   font-size: 12px;
   color: green;
+}
+.status_rej{
+  font-size: 12px;
+  color: red;
 }
 .main {
   width: 80%;

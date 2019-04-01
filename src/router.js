@@ -44,10 +44,11 @@ export default new Router({
         {
           path: '/setting',
           name: 'setting',
+          redirect:'/brand',
           component: () => import(/* webpackChunkName: "about" */ './views/setting.vue'),
           children:[
             {
-              path: '/',
+              path: '/hotBrand',
               name: 'hotBrand',
               component: () => import(/* webpackChunkName: "about" */ './components/hotBrand.vue')
             },

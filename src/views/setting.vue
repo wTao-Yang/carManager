@@ -4,7 +4,7 @@
       <div style="display:flex;min-height:60%;">
       <el-menu
       @select="handleSelect"
-      default-active="1"
+      :default-active="brand"
       class="el-menu-vertical-demo"
       background-color="#545c64"
       text-color="#fff"
@@ -57,6 +57,9 @@ export default {
   components: {
     HelloWorld
   },
+  created(){
+    this.brand = this.$route.name
+  },
   methods: {
     handleClick(row) {
       console.log(row);
@@ -81,7 +84,7 @@ export default {
           resource: '',
           desc: ''
         },
-      activeIndex2: "1",
+      brand:'',
      tableData: [
         {
           id: "12987122",

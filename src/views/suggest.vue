@@ -6,13 +6,13 @@
           <template slot-scope="props">
             <el-form label-position="left" inline class="demo-table-expand">
               <el-form-item label="反馈者 ID">
-                <span>{{ props.row.id }}</span>
+                <span>{{ props.row.userName }}</span>
               </el-form-item>
               <el-form-item label="反馈者昵称">
                 <span>{{ props.row.nickName }}</span>
               </el-form-item>
               <el-form-item label="反馈信息">
-                <span>{{ props.row.message }}</span>
+                <span>{{ props.row.suggestion }}</span>
               </el-form-item>
               <!-- <el-form-item label="车辆品牌">
                 <span>{{ props.row.brand }}</span>
@@ -32,25 +32,26 @@
             </el-form>
           </template>
         </el-table-column>
-        <el-table-column label="反馈者 ID" prop="id"></el-table-column>
+        <el-table-column label="反馈者 ID" prop="userName"></el-table-column>
         <el-table-column label="反馈者昵称" prop="nickName"></el-table-column>
         <el-table-column label="状态" prop="status"></el-table-column>
         <el-table-column fixed="right" label="操作" width="200">
           <template slot-scope="scope">
             <div v-if="scope.row.status=='审核中'">
-            <el-button @click="handleClick(scope.row)" type="text" size="small">处理</el-button>
-            <el-button type="text" size="small">拒绝</el-button>
+            <el-button @click="handleClick(scope.row,2)" type="text" size="small">处理</el-button>
+            <el-button @click="handleClick(scope.row,3)" type="text" size="small">拒绝</el-button>
             </div>
             <div v-else-if="scope.row.status=='已通过'||scope.row.status=='已处理'" class="status_res">
               {{ scope.row.status }}
             </div>
-            <div v-else-if="scope.row.status=='已拒绝'" class="status_rej">
+            <div v-else-if="scope.row.status=='已拒绝' || scope.row.status=='已取消'" class="status_rej">
               {{ scope.row.status }}
             </div>
+            <el-button @click="deleteSuggest(scope.row)" type="text" size="small">删除</el-button>
           </template>
         </el-table-column>
       </el-table>
-      <el-pagination class="page" background layout="prev, pager, next" :total="4"></el-pagination>
+      <el-pagination @current-change="change" class="page" :page-size="5" background layout="prev, pager, next" :total="dataList.length"></el-pagination>
     </div>
   </div>
 </template>
@@ -64,9 +65,45 @@ export default {
   components: {
     HelloWorld
   },
+  created(){
+    this.getSuggest()
+  },
   methods: {
-    handleClick(row) {
-      console.log(row);
+    deleteSuggest(row){
+      this.$api.deleteSuggest({suggestId:row.suggestId},data=>{
+        if(data.code==0){
+          this.$message({ message: "删除成功", type: "success",duration:'1500' });
+          this.getSuggest()
+        }else{
+          this.$message({ message: "删除失败", type: "error" ,duration:'1500'});
+        }
+      })
+    },
+    getSuggest(){
+      let self= this;
+      this.$api.getSuggest({},data=>{
+                this.dataList = data
+        
+        let self= this
+        this.dataList.forEach(item=>{
+          item.status = self.statusList[item.status]
+        })
+
+        this.tableData = this.dataList.slice(0,5)
+      })
+    },
+    handleClick(row,status) {
+      this.$api.setSuggestStatus({status:status,suggestId:row.suggestId},data=>{
+        if(data.code==0){
+          this.$message({ message: "操作成功", type: "success",duration:'1500' });
+          this.getSuggest()
+        }else{
+          this.$message({ message: "操作失败", type: "error",duration:'1500' });
+        }
+      })
+    },
+        change(page){
+      this.tableData = this.dataList.slice((page-1)*5,page*5)
     },
     handleSelect(key, keyPath) {
       console.log(key, keyPath);
@@ -75,6 +112,8 @@ export default {
 
   data() {
     return {
+      dataList:[],
+       statusList: ["审核中", "已取消", "已通过", "已拒绝"],
       activeIndex2: "1",
       tableData: [
         {
