@@ -5,7 +5,6 @@
     <el-form
       :model="form"
       status-icon
-      :rules="rules2"
       ref="form"
       label-width="100px"
       class="demo-ruleForm"
@@ -33,28 +32,40 @@ export default {
       }
     };
   },
-  created(){
+  created() {
     sessionStorage.removeItem("adminName");
   },
   methods: {
     submitForm(formName) {
-        if (this.form.userName!=''&& this.form.passWord!='') {
-          this.$api.login(
-            { adminName: this.form.userName, passWord: this.form.passWord },
-            data => {
-              if (data.code == 0) {
-                this.$message({ message: "登录成功", type: "success",duration:'1500' });
-                sessionStorage.setItem("status",data.data.status ); 
-                this.$router.push({ name: "home" });
-              } else {
-                this.$message({ message: "帐号或密码错误", type: "error",duration:'1500'});
-              }
+      if (this.form.userName != "" && this.form.passWord != "") {
+        this.$api.login(
+          { adminName: this.form.userName, passWord: this.form.passWord },
+          data => {
+            if (data.code == 0) {
+              this.$message({
+                message: "登录成功",
+                type: "success",
+                duration: "1500"
+              });
+              sessionStorage.setItem("status", data.data.status);
+              this.$router.push({ name: "home" });
+            } else {
+              this.$message({
+                message: "帐号或密码错误",
+                type: "error",
+                duration: "1500"
+              });
             }
-          );
-        } else {
-          this.$message({ message: "请输入帐号和密码", type: "error",duration:'1500' });
-          return false;
-        }
+          }
+        );
+      } else {
+        this.$message({
+          message: "请输入帐号和密码",
+          type: "error",
+          duration: "1500"
+        });
+        return false;
+      }
     }
   }
 };

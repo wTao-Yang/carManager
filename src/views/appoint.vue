@@ -1,30 +1,15 @@
 <template>
   <div class="home">
-    <!-- <div class="header">
-      <el-menu
-        :default-active="activeIndex2"
-        class="el-menu-demo"
-        mode="horizontal"
-        @select="handleSelect"
-        background-color="#545c64"
-        text-color="#fff"
-        active-text-color="#ffd04b"
-      >
-        <el-menu-item index="1">车辆列表</el-menu-item>
-        <el-menu-item index="2">卖车申请</el-menu-item>
-        <el-menu-item index="3">看车预约</el-menu-item>
-        <el-menu-item index="4">设置</el-menu-item>
-        <el-menu-item index="5">意见反馈</el-menu-item>
-        <el-menu-item index="6">权限管理</el-menu-item>
-      </el-menu>
-    </div> -->
     <div class="main">
+      <el-input placeholder="请输入车辆名称" v-model="search" class="input-with-select">
+        <el-button slot="append" @click="searchTitle" icon="el-icon-search"></el-button>
+      </el-input>
       <el-table :data="tableData" style="width: 100%">
         <el-table-column type="expand">
           <template slot-scope="props">
             <el-form label-position="left" inline class="demo-table-expand">
               <el-form-item label="预约 ID">
-                <span>{{ props.row.appointId   }}</span>
+                <span>{{ props.row.appointId }}</span>
               </el-form-item>
               <el-form-item label="车辆名称">
                 <span>{{ props.row.carTitle }}</span>
@@ -34,10 +19,10 @@
               </el-form-item>
               <!-- <el-form-item label="车辆品牌">
                 <span>{{ props.row.brand }}</span>
-              </el-form-item> -->
+              </el-form-item>-->
               <!-- <el-form-item label="行驶里程">
                 <span>{{ props.row.mileage }}</span>
-              </el-form-item> -->
+              </el-form-item>-->
               <el-form-item label="预约人姓名">
                 <span>{{ props.row.name }}</span>
               </el-form-item>
@@ -56,20 +41,26 @@
         <el-table-column fixed="right" label="操作" width="200">
           <template slot-scope="scope">
             <div v-if="scope.row.status=='审核中'">
-            <el-button @click="handleClick(scope.row,2)" type="text" size="small">通过</el-button>
-            <el-button @click="handleClick(scope.row,3)" type="text" size="small">拒绝</el-button>
+              <el-button @click="handleClick(scope.row,2)" type="text" size="small">通过</el-button>
+              <el-button @click="handleClick(scope.row,3)" type="text" size="small">拒绝</el-button>
             </div>
-            <div v-else-if="scope.row.status=='已通过'" class="status_res">
-              {{ scope.row.status }}
-            </div>
-            <div v-else-if="scope.row.status=='已拒绝'|| scope.row.status=='已取消'" class="status_rej">
-              {{ scope.row.status }}
-            </div>
+            <div v-else-if="scope.row.status=='已通过'" class="status_res">{{ scope.row.status }}</div>
+            <div
+              v-else-if="scope.row.status=='已拒绝'|| scope.row.status=='已取消'"
+              class="status_rej"
+            >{{ scope.row.status }}</div>
             <el-button @click="deleteAppoint(scope.row)" type="text" size="small">删除</el-button>
           </template>
         </el-table-column>
       </el-table>
-       <el-pagination @current-change="change" class="page" :page-size="5" background layout="prev, pager, next" :total="dataList.length"></el-pagination>
+      <el-pagination
+        @current-change="change"
+        class="page"
+        :page-size="5"
+        background
+        layout="prev, pager, next"
+        :total="dataList.length"
+      ></el-pagination>
     </div>
   </div>
 </template>
@@ -77,60 +68,80 @@
 <script>
 // @ is an alias to /src
 import HelloWorld from "@/components/HelloWorld.vue";
-import { getAppointList,setAppointStatus } from "./../api/index.js";
+import { getAppointList, setAppointStatus } from "./../api/index.js";
 export default {
   name: "home",
   components: {
     HelloWorld
   },
   methods: {
-        deleteAppoint(row){
-      this.$api.deleteAppoint({appointId:row.appointId},data=>{
-        if(data.code==0){
-          this.$message({ message: "删除成功", type: "success",duration:'1500' });
-          this.getList()
-        }else{
-          this.$message({ message: "删除失败", type: "error" ,duration:'1500'});
+    deleteAppoint(row) {
+      this.$api.deleteAppoint({ appointId: row.appointId }, data => {
+        if (data.code == 0) {
+          this.$message({
+            message: "删除成功",
+            type: "success",
+            duration: "1500"
+          });
+          this.getList();
+        } else {
+          this.$message({
+            message: "删除失败",
+            type: "error",
+            duration: "1500"
+          });
         }
-      })
+      });
     },
-    handleClick(row,status) {
-           setAppointStatus({status:status,appointId:row.appointId},data=>{
-        if(data.code==0){
-          this.$message({ message: "操作成功", type: "success",duration:'1500' });
-          this.getList()
-        }else{
-          this.$message({ message: "操作失败", type: "error",duration:'1500' });
+    handleClick(row, status) {
+      setAppointStatus({ status: status, appointId: row.appointId }, data => {
+        if (data.code == 0) {
+          this.$message({
+            message: "操作成功",
+            type: "success",
+            duration: "1500"
+          });
+          this.getList();
+        } else {
+          this.$message({
+            message: "操作失败",
+            type: "error",
+            duration: "1500"
+          });
         }
-      })
+      });
     },
     handleSelect(key, keyPath) {
       console.log(key, keyPath);
     },
-    getList(){
-      getAppointList({},data=>{
-                this.dataList = data
-        
-        let self= this
-        this.dataList.forEach(item=>{
-          item.status = self.statusList[item.status]
-        })
+    getList() {
+      getAppointList({ search: this.search }, data => {
+        this.dataList = data;
 
-        this.tableData = this.dataList.slice(0,5)
-      })
+        let self = this;
+        this.dataList.forEach(item => {
+          item.status = self.statusList[item.status];
+        });
+
+        this.tableData = this.dataList.slice(0, 5);
+      });
     },
-        change(page){
-      this.tableData = this.dataList.slice((page-1)*5,page*5)
+    change(page) {
+      this.tableData = this.dataList.slice((page - 1) * 5, page * 5);
     },
+    searchTitle() {
+      this.getList();
+    }
   },
-  created(){
-    this.getList()
+  created() {
+    this.getList();
   },
   data() {
     return {
-      dataList:[],
+      dataList: [],
+      search: "",
       activeIndex2: "1",
-            statusList: ["审核中", "已取消", "已通过", "已拒绝"],
+      statusList: ["审核中", "已取消", "已通过", "已拒绝"],
       tableData: [
         {
           id: "12345678",
@@ -139,11 +150,11 @@ export default {
           brand: "日产",
           access: "上海市普陀区真北路",
           introduction: "王小虎夫妻店",
-          date: '2014',
-          phone:'13531522222',
+          date: "2014",
+          phone: "13531522222",
           mileage: "4.32",
-          status:'审核中',
-          nickName:'王先生',
+          status: "审核中",
+          nickName: "王先生"
         },
         {
           id: "12345674",
@@ -152,11 +163,11 @@ export default {
           brand: "奔腾",
           access: "上海市普陀区真北路",
           introduction: "王小虎夫妻店",
-          phone:'13531522222',
-          date: '2014',
+          phone: "13531522222",
+          date: "2014",
           mileage: "8.44",
-          nickName:'王先生',
-          status:'已通过'
+          nickName: "王先生",
+          status: "已通过"
         },
         {
           id: "12312323",
@@ -165,12 +176,12 @@ export default {
           brand: "比亚迪",
           access: "上海市普陀区真北路",
           introduction: "王小虎夫妻店",
-          phone:'13531522222',
-          date: '2015',
-          nickName:'王先生',
+          phone: "13531522222",
+          date: "2015",
+          nickName: "王先生",
           mileage: "6.07",
-          status:'已拒绝'
-        },
+          status: "已拒绝"
+        }
         // {
         //   id: "12345781",
         //   name: "日产 轩逸 2012款 1.8XL CVT豪华版",
@@ -214,18 +225,17 @@ export default {
 .page {
   margin-top: 20px;
 }
-.status_res{
+.status_res {
   font-size: 12px;
   color: green;
 }
-.status_rej{
+.status_rej {
   font-size: 12px;
   color: red;
 }
 .main {
   width: 80%;
-  margin: 50px auto;
-  height: 1000px;
+  margin: 10px auto;
   // background-color: #f6f6f6;
   // .table {
   //   height: 600px;
@@ -243,5 +253,9 @@ export default {
   margin-right: 0;
   margin-bottom: 0;
   width: 50%;
+}
+.input-with-select {
+  float: right;
+  width: 250px;
 }
 </style>

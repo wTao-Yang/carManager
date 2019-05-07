@@ -73,6 +73,10 @@ const deleteAppoint=getData('/manager/deleteAppoint');
 
 const deleteApply=getData('/manager/deleteApply');
 
+const getChart=getData('/manager/getChart');
+
+const getPriceChart=getData('/manager/getPriceChart');
+
 export{
 	uploads,
 	newCar,
@@ -99,7 +103,9 @@ export{
 	deleteCar,
 	deleteApply,
 	deleteAppoint,
-	deleteSuggest
+	deleteSuggest,
+	getChart,
+	getPriceChart
 }
 
 export default{
@@ -128,5 +134,7 @@ export default{
 	deleteCar,
 	deleteApply,
 	deleteAppoint,
-	deleteSuggest
+	deleteSuggest,
+	getChart,
+	getPriceChart
 }

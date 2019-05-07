@@ -22,12 +22,12 @@
       </el-form-item>
       <el-form-item label="品牌" prop="carBrand">
         <el-select v-model="form.carBrand" placeholder="请选择">
-    <el-option
-      v-for="item in options"
-      :key="item.brandId"
-      :label="item.brand"
-      :value="item.brand">
-    </el-option>
+          <el-option
+            v-for="item in options"
+            :key="item.brandId"
+            :label="item.brand"
+            :value="item.brand"
+          ></el-option>
         </el-select>
       </el-form-item>
       <el-form-item label="出售价格" prop="price">
@@ -99,8 +99,8 @@
       </el-form-item>
       <div style="height:50px"></div>
       <el-form-item class="my_button">
-        <el-button type="primary" @click="onSubmit">立即创建</el-button>
-        <el-button>取消</el-button>
+        <el-button type="primary" @click="onSubmit">立即发布</el-button>
+        <!-- <el-button>取消</el-button> -->
       </el-form-item>
     </el-form>
   </div>
@@ -128,6 +128,7 @@ export default {
         assess: "",
         carImg: "",
         applyId: "",
+        userName: "",
         carId: "",
         introduction: ""
       },
@@ -173,9 +174,9 @@ export default {
         ]
       },
       fileList: [],
-      options:[],
+      options: [],
       fileName:
-        "http://localhost:8088/1553610717252-benten.jpg,http://localhost:8088/1553610764391-benten4.jpg"
+        ""
     };
   },
   created() {
@@ -183,15 +184,20 @@ export default {
       this.form.carId = this.$route.query.id;
       this._getDetail();
     }
-    this._getBrand()
+    if (this.$route.query.applyId) {
+      this.form.applyId = this.$route.query.applyId;
+      this.form.userName = this.$route.query.userName;
+    }
+    this._getBrand();
   },
   methods: {
-     _getBrand(){
-      this.$api.getBrand({},data=>{
-        this.options = data.data.result
-      })
+    _getBrand() {
+      this.$api.getBrand({}, data => {
+        this.options = data.data.result;
+      });
     },
     _getDetail() {
+      let self = this
       getDetail({ carId: this.form.carId }, data => {
         this.form = data;
         if (data.carImg != "") {
@@ -199,7 +205,7 @@ export default {
           let self = this;
           file.forEach(item => {
             let name = item.split("/");
-            self.fileList.push({ name: `${name[name.length - 1]}`, url: item });
+            self.fileList.push({ name: `${name[name.length - 1]}`, url: self.baseURL+item });
           });
         }
       });
@@ -212,7 +218,11 @@ export default {
     },
     exceed() {
       //超限弹窗
-      this.$message({ message: "只能上传5张图片！", type: "error",duration:'1500' });
+      this.$message({
+        message: "只能上传5张图片！",
+        type: "error",
+        duration: "1500"
+      });
     },
     postImg(img) {
       let formData = new FormData();
@@ -227,12 +237,13 @@ export default {
       //   }
       // });
       axios
-        .post("http://localhost:8088/upload", formData, {
+        .post(this.baseURL+"upload", formData, {
           headers: { "Content-Type": "multipart/form-data" }
         })
         .then(result => {
           if (result.data.code == 0) {
-            this.fileList.push(result.data.data);
+            let data = result.data.data
+            this.fileList.push({name:data.name,url:this.baseURL+data.url});
           } else {
           }
         });
@@ -246,21 +257,25 @@ export default {
       this.$refs.form.validate(valid => {
         if (valid) {
           this.form.buyTime = this.formatDate(this.form.buyTime);
-          if(this.form.annualRisk!=''){
-             this.form.annualRisk = this.formatDate(this.form.annualRisk);
+          if (this.form.annualRisk != "") {
+            this.form.annualRisk = this.formatDate(this.form.annualRisk);
           }
-          if(this.form.compulsoryInsurance!='')
-          this.form.compulsoryInsurance = this.formatDate(
-            this.form.compulsoryInsurance
-          );
-          if(this.form.commercialInsurance!='')
-          this.form.commercialInsurance = this.formatDate(
-            this.form.commercialInsurance
-          );
+          if (this.form.compulsoryInsurance != "")
+            this.form.compulsoryInsurance = this.formatDate(
+              this.form.compulsoryInsurance
+            );
+          if (this.form.commercialInsurance != "")
+            this.form.commercialInsurance = this.formatDate(
+              this.form.commercialInsurance
+            );
           newCar(this.form, data => {
             if (data.isSuccess) {
-              this.$message({ message: "发布成功", type: "success",duration:'1500' });
-              this.$router.push({name: 'home'})
+              this.$message({
+                message: "发布成功",
+                type: "success",
+                duration: "1500"
+              });
+              this.$router.push({ name: "home" });
             }
           });
         } else {
@@ -305,6 +320,10 @@ export default {
     margin: 0 !important;
     padding: 10px 0;
     background-color: rgb(84, 92, 100);
+  }
+  .el-textarea__inner{
+    overflow: hidden;
+    min-height: 60px !important;
   }
 }
 </style>

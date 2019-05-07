@@ -8,7 +8,7 @@ import api from './api/index'
 Vue.use(ElementUI);
 
 Vue.prototype.$api = api
-
+// Vue.prototype.baseURL = "http://localhost:8088/"
 Vue.config.productionTip = false
 
 new Vue({
@@ -16,3 +16,5 @@ new Vue({
   store,
   render: h => h(App)
 }).$mount('#app')
+
+Vue.prototype.baseURL="http://localhost:8088/"

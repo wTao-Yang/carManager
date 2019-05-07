@@ -4,12 +4,11 @@
       <div style="display:flex;min-height:60%;">
         <div class="box">
           <div class="box_header">热门品牌导航设置</div>
-          <el-form
-            style="width:500px;margin:20px 20px"
-            label-width="80px"
-          >
-            <el-form-item  v-for="(item,index) in list" :key="index" :label="'热门品牌'+(index+1)">
-              <el-input v-model="item.hotBrand"><el-button @click="setHotBrand(item)" slot="append">提交</el-button></el-input>
+          <el-form style="width:500px;margin:20px 20px" label-width="80px">
+            <el-form-item v-for="(item,index) in list" :key="index" :label="'热门品牌'+(index+1)">
+              <el-input v-model="item.hotBrand">
+                <el-button @click="setHotBrand(item)" slot="append">提交</el-button>
+              </el-input>
             </el-form-item>
             <!-- <el-form-item label="热门品牌2">
               <el-input v-model="brand2"><el-button slot="append">提交</el-button></el-input>
@@ -19,7 +18,7 @@
             </el-form-item>
             <el-form-item label="热门品牌4">
               <el-input v-model="brand4"><el-button slot="append">提交</el-button></el-input>
-            </el-form-item> -->
+            </el-form-item>-->
           </el-form>
         </div>
       </div>
@@ -36,29 +35,44 @@ export default {
   components: {
     HelloWorld
   },
-  created(){
-    this.getDetail()
+  created() {
+    this.getDetail();
   },
   methods: {
-    setHotBrand(item){
-      if(item.hotBrand == ''){
-        this.$message({ message: "品牌名称不能为空", type: "error",duration:'1500' });
-        return
+    setHotBrand(item) {
+      if (item.hotBrand == "") {
+        this.$message({
+          message: "品牌名称不能为空",
+          type: "error",
+          duration: "1500"
+        });
+        return;
       }
-      this.$api.setHotBrand({hotId:item.hotId,hotBrand:item.hotBrand},data=>{
-                if (data.code==0) {
-          this.$message({ message: "修改成功", type: "success",duration:'1500' });
-          this._getBrand()
-        }else{
-          this.$message({ message: "修改失败", type: "error",duration:'1500' });
+      this.$api.setHotBrand(
+        { hotId: item.hotId, hotBrand: item.hotBrand },
+        data => {
+          if (data.code == 0) {
+            this.$message({
+              message: "修改成功",
+              type: "success",
+              duration: "1500"
+            });
+            this._getBrand();
+          } else {
+            this.$message({
+              message: "修改失败",
+              type: "error",
+              duration: "1500"
+            });
+          }
         }
-      })
+      );
     },
-    getDetail(){
-      let self= this;
-      this.$api.getHotBrand({},data=>{
+    getDetail() {
+      let self = this;
+      this.$api.getHotBrand({}, data => {
         self.list = data.data.result;
-      })
+      });
     },
     submit() {},
     handleClick(row) {
@@ -86,11 +100,11 @@ export default {
 
   data() {
     return {
-      list:[],
-        brand1:'',
-        brand2:'',
-        brand3:'',
-        brand4:'',
+      list: [],
+      brand1: "",
+      brand2: "",
+      brand3: "",
+      brand4: ""
     };
   }
 };

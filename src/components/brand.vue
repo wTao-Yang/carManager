@@ -3,7 +3,11 @@
     <div class="main">
       <div class="fabu">
         <el-button type="primary" @click="openMes()">新建品牌</el-button>
+        <el-input placeholder="请输入车辆名称" v-model="search" class="input-with-select">
+          <el-button slot="append" @click="searchTitle" icon="el-icon-search"></el-button>
+        </el-input>
       </div>
+
       <el-table class="table" :data="tableData" border style="width: 100%">
         <!-- <el-table-column fixed prop="date" label="日期" width="200"></el-table-column> -->
         <el-table-column label="品牌 ID" prop="brandId"></el-table-column>
@@ -18,7 +22,14 @@
           </template>
         </el-table-column>
       </el-table>
- <el-pagination @current-change="change" class="page" :page-size="5" background layout="prev, pager, next" :total="dataList.length"></el-pagination>
+      <el-pagination
+        @current-change="change"
+        class="page"
+        :page-size="5"
+        background
+        layout="prev, pager, next"
+        :total="dataList.length"
+      ></el-pagination>
     </div>
     <div class="message" v-if="showMes"></div>
     <div class="mes" v-if="showMes">
@@ -43,34 +54,49 @@
 // @ is an alias to /src
 import HelloWorld from "@/components/HelloWorld.vue";
 import { getBrand } from "./../api/index.js";
-import { debug } from 'util';
+import { debug } from "util";
 export default {
   name: "brand",
   components: {
     HelloWorld
   },
-  created(){
-    this._getBrand()
+  created() {
+    this._getBrand();
   },
   methods: {
-    _getBrand(){
-      getBrand({},data=>{
-        this.dataList = data.data.result
-        this.tableData = this.dataList.slice(0,5)
-      })
+    _getBrand() {
+      getBrand({ search: this.search }, data => {
+        this.dataList = data.data.result;
+        this.tableData = this.dataList.slice(0, 5);
+      });
     },
     submit() {
-      if(this.brand==''){
-        this.$message({ message: "品牌名称不能为空", type: "error",duration:'1500' });
-        return
+      if (this.brand == "") {
+        this.$message({
+          message: "品牌名称不能为空",
+          type: "error",
+          duration: "1500"
+        });
+        return;
       }
-      this.$api.setBrand({brandId:this.brandId,brand:this.brand,introduction:this.introduction},data=>{
-        if (data.isSuccess) {
-          this.$message({ message: "新建成功", type: "success",duration:'1500' });
-          this._getBrand()
-          this.closeMes()
+      this.$api.setBrand(
+        {
+          brandId: this.brandId,
+          brand: this.brand,
+          introduction: this.introduction
+        },
+        data => {
+          if (data.isSuccess) {
+            this.$message({
+              message: "新建成功",
+              type: "success",
+              duration: "1500"
+            });
+            this._getBrand();
+            this.closeMes();
+          }
         }
-      })
+      );
     },
     handleClick(row) {
       this.title = "编辑品牌";
@@ -83,18 +109,29 @@ export default {
     handleSelect(key, keyPath) {
       console.log(key, keyPath);
     },
-                change(page){
-      this.tableData = this.dataList.slice((page-1)*5,page*5)
+    searchTitle() {
+      this._getBrand();
+    },
+    change(page) {
+      this.tableData = this.dataList.slice((page - 1) * 5, page * 5);
     },
     deleteBrand(row) {
-            this.$api.deleteBrand({brandId:row.brandId},data=>{
-        if (data.code==0) {
-          this.$message({ message: "删除成功", type: "success",duration:'1500' });
-          this._getBrand()
-        }else{
-          this.$message({ message: "删除失败", type: "error",duration:'1500' });
+      this.$api.deleteBrand({ brandId: row.brandId }, data => {
+        if (data.code == 0) {
+          this.$message({
+            message: "删除成功",
+            type: "success",
+            duration: "1500"
+          });
+          this._getBrand();
+        } else {
+          this.$message({
+            message: "删除失败",
+            type: "error",
+            duration: "1500"
+          });
         }
-      })
+      });
     },
     openMes() {
       this.title = "新建品牌";
@@ -102,25 +139,25 @@ export default {
     },
     closeMes() {
       this.showMes = false;
-      this.brandId = '';
-      this.brand = '';
-      this.introduction = '';
+      this.brandId = "";
+      this.brand = "";
+      this.introduction = "";
     }
   },
   data() {
     return {
-      dataList:[],
-      brand:'',
-      introduction:'',
-      brandId:'',
+      search: "",
+      dataList: [],
+      brand: "",
+      introduction: "",
+      brandId: "",
       passWord: "",
       vPassWord: "",
       adminName: "",
       title: "",
       showMes: false,
       activeIndex2: "1",
-      tableData: [
-      ]
+      tableData: []
     };
   }
 };
@@ -195,7 +232,7 @@ export default {
 }
 .main {
   width: 100%;
-//   margin: 0 auto;
+  //   margin: 0 auto;
 
   // background-color: #f6f6f6;
   // .table {
@@ -204,11 +241,16 @@ export default {
   .fabu {
     width: 100%;
     text-align: left;
-    padding: 10px;
+    display: flex;
+    padding-bottom: 10px;
+    justify-content: space-between;
   }
 }
 .status_rej {
   font-size: 12px;
   color: red;
+}
+.input-with-select {
+  width: 250px;
 }
 </style>

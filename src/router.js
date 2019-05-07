@@ -62,6 +62,11 @@ export default new Router({
               name: 'wheel',
               component: () => import(/* webpackChunkName: "about" */ './components/wheel.vue')
             },
+            {
+              path: '/dataPic',
+              name: 'dataPic',
+              component: () => import(/* webpackChunkName: "about" */ './views/dataPic.vue')
+            },
           ]
         },
         {
